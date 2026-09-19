@@ -11,8 +11,8 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-3.6-flash" });
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 const SENIOR_SYSTEM_PROMPT = `You are "Sahayak", a warm, patient, and caring AI companion designed specifically for senior citizens in India.
 
@@ -41,7 +41,9 @@ function getChatSession(sessionId) {
   return chatSessions.get(sessionId);
 }
 
-app.post("/api/chat", async (req, res) => {
+const apiRouter = express.Router();
+
+apiRouter.post("/chat", async (req, res) => {
   try {
     const { message, sessionId = "default" } = req.body;
     if (!message) return res.status(400).json({ error: "Message is required" });
@@ -57,7 +59,7 @@ app.post("/api/chat", async (req, res) => {
   }
 });
 
-app.post("/api/scam-check", async (req, res) => {
+apiRouter.post("/scam-check", async (req, res) => {
   try {
     const { message } = req.body;
     if (!message) return res.status(400).json({ error: "Message is required" });
@@ -90,7 +92,7 @@ Respond in this exact JSON format only, no markdown:
   }
 });
 
-app.post("/api/medicine-info", async (req, res) => {
+apiRouter.post("/medicine-info", async (req, res) => {
   try {
     const { medicine } = req.body;
     if (!medicine) return res.status(400).json({ error: "Medicine name is required" });
@@ -120,7 +122,7 @@ Respond in this exact JSON format only, no markdown:
   }
 });
 
-app.post("/api/daily-tip", async (req, res) => {
+apiRouter.post("/daily-tip", async (req, res) => {
   try {
     const { mood } = req.body;
 
@@ -148,7 +150,16 @@ Respond in this exact JSON format only, no markdown:
   }
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Sahayak server running on http://localhost:${PORT}`);
-});
+// Mount router on /api and root paths for compatibility across environments
+app.use("/api", apiRouter);
+app.use("/.netlify/functions/api", apiRouter);
+app.use("/", apiRouter);
+
+if (require.main === module) {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
+    console.log(`Sahayak server running on http://localhost:${PORT}`);
+  });
+}
+
+module.exports = app;

@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "echo 'Build complete'"
   },
   "repository": {
     "type": "git",
@@ -23,6 +23,7 @@
     "@google/generative-ai": "^0.24.1",
     "cors": "^2.8.6",
     "dotenv": "^18.0.1",
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "serverless-http": "^4.0.0"
   }
 }
