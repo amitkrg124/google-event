@@ -848,7 +848,7 @@
 
       speakText(data.explanation + '. ' + data.advice);
     } catch (err) {
-      alert('Could not check this message. Please try again.');
+      alert('Could not check this message: ' + (err.message || 'Please try again.'));
     }
 
     btn.disabled = false;
@@ -885,7 +885,7 @@
 
       result.classList.add('show');
     } catch (err) {
-      alert('Could not get medicine information. Please try again.');
+      alert('Could not get medicine information: ' + (err.message || 'Please try again.'));
     }
 
     btn.disabled = false;
@@ -937,7 +937,7 @@
 
       speakText(data.greeting + '. ' + data.tip + '. ' + data.activity);
     } catch (err) {
-      alert('Could not get wellness tip. Please try again.');
+      alert('Could not get wellness tip: ' + (err.message || 'Please try again.'));
     }
 
     btn.disabled = false;

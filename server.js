@@ -11,9 +11,6 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
 const SENIOR_SYSTEM_PROMPT = `You are "Sahayak", a warm, patient, and caring AI companion designed specifically for senior citizens in India.
 
 RULES:
@@ -26,9 +23,20 @@ RULES:
 - Be proactive: suggest helpful next steps when appropriate.
 - Never give definitive medical diagnoses. Always say "please consult your doctor".`;
 
+function getModel() {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    throw new Error("GEMINI_API_KEY is missing. Please set it in your environment variables.");
+  }
+  const genAI = new GoogleGenerativeAI(apiKey);
+  // Default to gemini-2.5-flash or gemini-2.0-flash or gemini-1.5-flash
+  return genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+}
+
 const chatSessions = new Map();
 
 function getChatSession(sessionId) {
+  const model = getModel();
   if (!chatSessions.has(sessionId)) {
     const chat = model.startChat({
       history: [
@@ -43,6 +51,16 @@ function getChatSession(sessionId) {
 
 const apiRouter = express.Router();
 
+// Health check endpoint to verify environment configuration
+apiRouter.get("/health", (req, res) => {
+  const hasKey = !!process.env.GEMINI_API_KEY;
+  res.json({
+    status: "ok",
+    hasApiKey: hasKey,
+    keyPreview: hasKey ? `...${process.env.GEMINI_API_KEY.slice(-4)}` : "missing"
+  });
+});
+
 apiRouter.post("/chat", async (req, res) => {
   try {
     const { message, sessionId = "default" } = req.body;
@@ -54,8 +72,8 @@ apiRouter.post("/chat", async (req, res) => {
 
     res.json({ reply: response });
   } catch (err) {
-    console.error("Chat error:", err.message);
-    res.status(500).json({ error: "AI service temporarily unavailable. Please try again." });
+    console.error("Chat error:", err);
+    res.status(500).json({ error: err.message || "AI service temporarily unavailable." });
   }
 });
 
@@ -64,6 +82,7 @@ apiRouter.post("/scam-check", async (req, res) => {
     const { message } = req.body;
     if (!message) return res.status(400).json({ error: "Message is required" });
 
+    const model = getModel();
     const prompt = `You are a scam detection expert helping senior citizens in India stay safe.
 
 Analyze this message and determine if it is a SCAM or SAFE.
@@ -87,8 +106,8 @@ Respond in this exact JSON format only, no markdown:
 
     res.json(analysis);
   } catch (err) {
-    console.error("Scam check error:", err.message);
-    res.status(500).json({ error: "Could not analyze the message. Please try again." });
+    console.error("Scam check error:", err);
+    res.status(500).json({ error: err.message || "Could not analyze the message." });
   }
 });
 
@@ -97,6 +116,7 @@ apiRouter.post("/medicine-info", async (req, res) => {
     const { medicine } = req.body;
     if (!medicine) return res.status(400).json({ error: "Medicine name is required" });
 
+    const model = getModel();
     const prompt = `You are a helpful medical information assistant for senior citizens. Explain this medicine in very simple language that an elderly person can easily understand.
 
 Medicine: "${medicine}"
@@ -117,8 +137,8 @@ Respond in this exact JSON format only, no markdown:
 
     res.json(info);
   } catch (err) {
-    console.error("Medicine info error:", err.message);
-    res.status(500).json({ error: "Could not get medicine information. Please try again." });
+    console.error("Medicine info error:", err);
+    res.status(500).json({ error: err.message || "Could not get medicine information." });
   }
 });
 
@@ -126,6 +146,7 @@ apiRouter.post("/daily-tip", async (req, res) => {
   try {
     const { mood } = req.body;
 
+    const model = getModel();
     const prompt = `You are Sahayak, a caring wellness companion for senior citizens in India.
 The user is feeling: "${mood || "okay"}"
 
@@ -145,12 +166,12 @@ Respond in this exact JSON format only, no markdown:
 
     res.json(tip);
   } catch (err) {
-    console.error("Daily tip error:", err.message);
-    res.status(500).json({ error: "Could not generate tip. Please try again." });
+    console.error("Daily tip error:", err);
+    res.status(500).json({ error: err.message || "Could not generate tip." });
   }
 });
 
-// Mount router on /api and root paths for compatibility across environments
+// Mount router on /api and fallback paths
 app.use("/api", apiRouter);
 app.use("/.netlify/functions/api", apiRouter);
 app.use("/", apiRouter);
