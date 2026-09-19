@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sahayak - Your Daily AI Companion</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #2B6777;
+      --primary-light: #3A8A9E;
+      --primary-pale: #E4F0F3;
+      --accent: #E8A838;
+      --accent-hover: #D4952B;
+      --safe: #3D8B5E;
+      --safe-bg: #E9F5EE;
+      --danger: #C94040;
+      --danger-bg: #FCEAEA;
+      --warning: #D4952B;
+      --warning-bg: #FDF3E1;
+      --bg: #F7F5F0;
+      --card: #FFFFFF;
+      --text: #1C1C28;
+      --text-mid: #4A4A5A;
+      --text-muted: #7C7C8A;
+      --border: #E2E0DB;
+      --input-bg: #FAFAF8;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Nunito', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 20px;
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* --- Header --- */
+    header {
+      background: linear-gradient(135deg, #234E5C 0%, var(--primary) 50%, var(--primary-light) 100%);
+      color: white;
+      padding: 24px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .header-left h1 {
+      font-size: 30px;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+      line-height: 1.2;
+    }
+
+    .header-left p {
+      font-size: 15px;
+      opacity: 0.75;
+      font-weight: 600;
+    }
+
+    .emergency-link {
+      background: rgba(255,255,255,0.15);
+      color: white;
+      text-decoration: none;
+      padding: 10px 18px;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+
+    .emergency-link:hover { background: var(--danger); }
+
+    /* --- Navigation --- */
+    .nav-tabs {
+      display: flex;
+      gap: 8px;
+      padding: 16px 20px;
+      background: var(--bg);
+      overflow-x: auto;
+      position: sticky;
+      top: 0;
+      z-index: 99;
+    }
+
+    .nav-tab {
+      flex: 1;
+      padding: 14px 10px;
+      text-align: center;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      background: var(--card);
+      color: var(--text-mid);
+      border-radius: 14px;
+      transition: all 0.2s;
+      white-space: nowrap;
+      min-width: 100px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+
+    .nav-tab:hover { background: var(--primary-pale); color: var(--primary); }
+
+    .nav-tab.active {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 4px 14px rgba(43,103,119,0.3);
+    }
+
+    .nav-tab .tab-icon {
+      font-size: 24px;
+      display: block;
+      margin-bottom: 3px;
+    }
+
+    /* --- Content --- */
+    .tab-content { display: none; padding: 0 20px 32px; max-width: 720px; margin: 0 auto; }
+    .tab-content.active { display: block; }
+
+    .card {
+      background: var(--card);
+      border-radius: 20px;
+      padding: 28px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+    }
+
+    .card-header {
+      margin-bottom: 20px;
+    }
+
+    .card-header h2 {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .card-header p {
+      color: var(--text-muted);
+      font-size: 17px;
+      line-height: 1.5;
+    }
+
+    /* --- Inputs --- */
+    textarea, input[type="text"] {
+      width: 100%;
+      padding: 16px 20px;
+      font-size: 20px;
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      resize: vertical;
+      font-family: inherit;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      background: var(--input-bg);
+      color: var(--text);
+    }
+
+    textarea:focus, input[type="text"]:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(43,103,119,0.12);
+      background: #fff;
+    }
+
+    /* --- Buttons --- */
+    .btn {
+      padding: 14px 28px;
+      font-size: 18px;
+      font-weight: 700;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-family: inherit;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #1C1C28;
+    }
+    .btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px); }
+    .btn-primary:active { transform: translateY(0); }
+    .btn-primary:disabled { background: #DDD; color: #999; cursor: not-allowed; transform: none; }
+
+    .btn-voice {
+      background: var(--danger);
+      color: white;
+      border-radius: 50%;
+      width: 56px;
+      height: 56px;
+      padding: 0;
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+    .btn-voice.listening {
+      animation: pulse 1s infinite;
+      background: #9B2C2C;
+    }
+
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(201,64,64,0.35); }
+      50% { box-shadow: 0 0 0 14px rgba(201,64,64,0); }
+    }
+
+    .speak-btn {
+      background: var(--primary-pale);
+      border: none;
+      border-radius: 10px;
+      padding: 8px 16px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      font-family: inherit;
+      color: var(--primary);
+      transition: background 0.15s;
+      margin-top: 10px;
+    }
+
+    .speak-btn:hover { background: #cce4ea; }
+
+    /* --- Chat --- */
+    .chat-messages {
+      max-height: 420px;
+      overflow-y: auto;
+      margin-bottom: 16px;
+      padding: 16px;
+      background: var(--bg);
+      border-radius: 16px;
+    }
+
+    .chat-msg {
+      margin-bottom: 14px;
+      padding: 16px 20px;
+      border-radius: 20px;
+      max-width: 85%;
+      font-size: 19px;
+      line-height: 1.55;
+    }
+
+    .chat-msg.user {
+      background: var(--primary);
+      color: white;
+      margin-left: auto;
+      border-bottom-right-radius: 6px;
+    }
+
+    .chat-msg.bot {
+      background: var(--card);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      border-bottom-left-radius: 6px;
+    }
+
+    .chat-msg .speaker {
+      font-size: 13px;
+      font-weight: 800;
+      margin-bottom: 4px;
+      text-transform: lowercase;
+      letter-spacing: 0.3px;
+      opacity: 0.6;
+    }
+
+    .chat-input-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .chat-input-row input { flex: 1; }
+
+    /* --- Scam results --- */
+    .result-box {
+      padding: 24px;
+      border-radius: 16px;
+      margin-top: 20px;
+      display: none;
+    }
+
+    .result-box.show { display: block; }
+    .result-box.safe { background: var(--safe-bg); }
+    .result-box.scam { background: var(--danger-bg); }
+    .result-box.suspicious { background: var(--warning-bg); }
+
+    .verdict-badge {
+      display: inline-block;
+      padding: 8px 20px;
+      border-radius: 10px;
+      font-size: 20px;
+      font-weight: 800;
+      color: white;
+      margin-bottom: 14px;
+    }
+
+    .verdict-badge.safe { background: var(--safe); }
+    .verdict-badge.scam { background: var(--danger); }
+    .verdict-badge.suspicious { background: var(--warning); color: #1C1C28; }
+
+    .result-box p { font-size: 20px; line-height: 1.6; }
+    .result-box .advice { color: var(--text-mid); margin-top: 8px; }
+
+    /* --- Medicine --- */
+    .medicine-result { display: none; margin-top: 20px; }
+    .medicine-result.show { display: block; }
+
+    .med-field {
+      padding: 18px 20px;
+      margin-bottom: 10px;
+      background: var(--bg);
+      border-radius: 14px;
+    }
+
+    .med-field h3 {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--primary);
+      margin-bottom: 4px;
+    }
+
+    .med-field p { font-size: 19px; }
+
+    .med-field.side-effects { border-left: 4px solid var(--warning); }
+    .med-field.warnings { border-left: 4px solid var(--danger); }
+
+    .disclaimer {
+      background: var(--warning-bg);
+      padding: 14px 20px;
+      border-radius: 12px;
+      font-size: 16px;
+      color: #8B6914;
+      margin-top: 14px;
+      font-weight: 600;
+    }
+
+    /* --- Wellness --- */
+    .mood-options {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin: 20px 0;
+    }
+
+    .mood-btn {
+      padding: 18px 10px;
+      font-size: 17px;
+      font-weight: 700;
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      background: white;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s;
+      font-family: inherit;
+      color: var(--text);
+    }
+
+    .mood-btn:hover {
+      border-color: var(--primary);
+      background: var(--primary-pale);
+    }
+
+    .mood-btn.selected {
+      border-color: var(--primary);
+      background: var(--primary);
+      color: white;
+    }
+
+    .mood-btn .mood-emoji {
+      font-size: 36px;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .wellness-result { display: none; margin-top: 20px; }
+    .wellness-result.show { display: block; }
+
+    .wellness-card {
+      padding: 20px;
+      margin-bottom: 10px;
+      border-radius: 14px;
+      background: var(--safe-bg);
+    }
+
+    .wellness-card h3 {
+      color: var(--safe);
+      margin-bottom: 4px;
+      font-size: 15px;
+      font-weight: 800;
+    }
+
+    .wellness-card.motivation {
+      background: var(--primary-pale);
+    }
+
+    .wellness-card.motivation h3 { color: var(--primary); }
+
+    /* --- Safety tips --- */
+    .tips-card {
+      background: var(--safe-bg);
+      border-radius: 20px;
+      padding: 24px 28px;
+    }
+
+    .tips-card h2 {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--safe);
+      margin-bottom: 12px;
+    }
+
+    .tips-card ul {
+      padding-left: 20px;
+      font-size: 18px;
+      line-height: 2;
+      color: var(--text-mid);
+    }
+
+    .tips-card li { padding-left: 4px; }
+
+    /* --- Loading --- */
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 24px;
+      color: var(--text-muted);
+      font-size: 18px;
+    }
+
+    .loading.show { display: flex; align-items: center; justify-content: center; gap: 12px; }
+
+    .spinner {
+      width: 22px;
+      height: 22px;
+      border: 3px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* --- Footer --- */
+    footer {
+      text-align: center;
+      padding: 28px 20px;
+      font-size: 14px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    footer span { color: var(--primary); }
+
+    /* --- Focus --- */
+    :focus-visible {
+      outline: 3px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    /* --- Reduced motion --- */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    /* --- Mobile --- */
+    @media (max-width: 600px) {
+      body { font-size: 18px; }
+      header { padding: 18px 16px; }
+      .header-left h1 { font-size: 24px; }
+      .nav-tabs { padding: 12px 12px; gap: 6px; }
+      .nav-tab { font-size: 13px; padding: 10px 6px; border-radius: 10px; min-width: 72px; }
+      .nav-tab .tab-icon { font-size: 20px; }
+      .tab-content { padding: 0 14px 24px; }
+      .card { padding: 20px; border-radius: 16px; }
+      .btn { padding: 12px 20px; font-size: 17px; }
+      .mood-options { grid-template-columns: repeat(2, 1fr); }
+      .chat-msg { font-size: 17px; }
+      .emergency-link { padding: 8px 12px; font-size: 14px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <h1>Sahayak</h1>
+    <p>Your trusted AI daily companion</p>
+  </div>
+  <a href="tel:112" class="emergency-link" aria-label="Call emergency number 112">
+    📞 Emergency 112
+  </a>
+</header>
+
+<nav class="nav-tabs" role="tablist">
+  <button class="nav-tab active" data-tab="chat" role="tab" aria-selected="true">
+    <span class="tab-icon" aria-hidden="true">💬</span>
+    Talk to AI
+  </button>
+  <button class="nav-tab" data-tab="scam" role="tab" aria-selected="false">
+    <span class="tab-icon" aria-hidden="true">🛡️</span>
+    Scam Check
+  </button>
+  <button class="nav-tab" data-tab="medicine" role="tab" aria-selected="false">
+    <span class="tab-icon" aria-hidden="true">💊</span>
+    Medicine
+  </button>
+  <button class="nav-tab" data-tab="wellness" role="tab" aria-selected="false">
+    <span class="tab-icon" aria-hidden="true">🌿</span>
+    Wellness
+  </button>
+</nav>
+
+<!-- CHAT TAB -->
+<div id="tab-chat" class="tab-content active">
+  <div class="card">
+    <div class="card-header">
+      <h2>Chat with Sahayak</h2>
+      <p>Ask me anything — I'll help you with daily tasks, questions, and more.</p>
+    </div>
+
+    <div class="chat-messages" id="chatMessages">
+      <div class="chat-msg bot">
+        <div class="speaker">sahayak</div>
+        Namaste! I'm Sahayak, your daily companion. How can I help you today? You can type or tap the microphone to speak.
+      </div>
+    </div>
+
+    <div class="chat-input-row">
+      <input type="text" id="chatInput" placeholder="Type your message here..."
+             onkeydown="if(event.key==='Enter')sendChat()" aria-label="Type your message">
+      <button class="btn btn-voice" id="voiceBtn" onclick="toggleVoice()" title="Speak your message" aria-label="Voice input">
+        🎤
+      </button>
+      <button class="btn btn-primary" onclick="sendChat()" aria-label="Send message">Send</button>
+    </div>
+  </div>
+</div>
+
+<!-- SCAM CHECK TAB -->
+<div id="tab-scam" class="tab-content">
+  <div class="card">
+    <div class="card-header">
+      <h2>Scam and fraud checker</h2>
+      <p>Got a suspicious SMS, email, or WhatsApp message? Paste it below and I'll check if it's safe.</p>
+    </div>
+
+    <textarea id="scamInput" rows="5" placeholder="Paste the suspicious message here...&#10;&#10;Example: 'Dear customer, your SBI account will be blocked. Click this link to verify: http://sbi-verify.xyz'" aria-label="Paste suspicious message"></textarea>
+
+    <div style="margin-top:16px;">
+      <button class="btn btn-primary" onclick="checkScam()" id="scamBtn">Check this message</button>
+    </div>
+
+    <div class="loading" id="scamLoading">
+      <div class="spinner"></div>
+      <span>Analyzing message</span>
+    </div>
+
+    <div class="result-box" id="scamResult">
+      <span class="verdict-badge" id="scamVerdict"></span>
+      <p id="scamExplanation"></p>
+      <p id="scamAdvice" class="advice"></p>
+      <button class="speak-btn" onclick="speakText(document.getElementById('scamExplanation').textContent)">🔊 Read aloud</button>
+    </div>
+  </div>
+
+  <div class="tips-card">
+    <h2>Quick safety tips</h2>
+    <ul>
+      <li>Banks never ask for OTP or password via SMS or call</li>
+      <li>Don't click links from unknown numbers</li>
+      <li>If someone says "you won a prize" — it's likely a scam</li>
+      <li>When in doubt, call your bank from the number on your card</li>
+    </ul>
+  </div>
+</div>
+
+<!-- MEDICINE TAB -->
+<div id="tab-medicine" class="tab-content">
+  <div class="card">
+    <div class="card-header">
+      <h2>Medicine information</h2>
+      <p>Type the name of any medicine and I'll explain it in simple words.</p>
+    </div>
+
+    <input type="text" id="medicineInput" placeholder="e.g., Paracetamol, Metformin, Amlodipine..."
+           onkeydown="if(event.key==='Enter')getMedicineInfo()" aria-label="Enter medicine name">
+
+    <div style="margin-top:16px;">
+      <button class="btn btn-primary" onclick="getMedicineInfo()" id="medBtn">Explain this medicine</button>
+    </div>
+
+    <div class="loading" id="medLoading">
+      <div class="spinner"></div>
+      <span>Looking up medicine</span>
+    </div>
+
+    <div class="medicine-result" id="medResult">
+      <div class="med-field">
+        <h3>What is it for?</h3>
+        <p id="medPurpose"></p>
+      </div>
+      <div class="med-field">
+        <h3>How to take it?</h3>
+        <p id="medHow"></p>
+      </div>
+      <div class="med-field side-effects">
+        <h3>Possible side effects</h3>
+        <p id="medSide"></p>
+      </div>
+      <div class="med-field warnings">
+        <h3>Important warnings</h3>
+        <p id="medWarnings"></p>
+      </div>
+      <button class="speak-btn" onclick="speakMedicine()">🔊 Read all aloud</button>
+      <div class="disclaimer" id="medDisclaimer"></div>
+    </div>
+  </div>
+</div>
+
+<!-- WELLNESS TAB -->
+<div id="tab-wellness" class="tab-content">
+  <div class="card">
+    <div class="card-header">
+      <h2>Daily wellness check-in</h2>
+      <p>How are you feeling today? Tap an option below.</p>
+    </div>
+
+    <div class="mood-options">
+      <button class="mood-btn" onclick="selectMood(this, 'happy')">
+        <span class="mood-emoji">😊</span>
+        Happy
+      </button>
+      <button class="mood-btn" onclick="selectMood(this, 'okay')">
+        <span class="mood-emoji">🙂</span>
+        Okay
+      </button>
+      <button class="mood-btn" onclick="selectMood(this, 'tired')">
+        <span class="mood-emoji">😴</span>
+        Tired
+      </button>
+      <button class="mood-btn" onclick="selectMood(this, 'sad')">
+        <span class="mood-emoji">😔</span>
+        Sad
+      </button>
+      <button class="mood-btn" onclick="selectMood(this, 'anxious')">
+        <span class="mood-emoji">😰</span>
+        Anxious
+      </button>
+      <button class="mood-btn" onclick="selectMood(this, 'pain')">
+        <span class="mood-emoji">🤕</span>
+        In Pain
+      </button>
+    </div>
+
+    <button class="btn btn-primary" onclick="getWellnessTip()" id="wellnessBtn" disabled>Get my wellness tip</button>
+
+    <div class="loading" id="wellnessLoading">
+      <div class="spinner"></div>
+      <span>Preparing your personalized tip</span>
+    </div>
+
+    <div class="wellness-result" id="wellnessResult">
+      <div class="wellness-card">
+        <h3>Good morning</h3>
+        <p id="wellnessGreeting"></p>
+      </div>
+      <div class="wellness-card">
+        <h3>Today's tip</h3>
+        <p id="wellnessTip"></p>
+      </div>
+      <div class="wellness-card">
+        <h3>Try this activity</h3>
+        <p id="wellnessActivity"></p>
+      </div>
+      <div class="wellness-card motivation">
+        <h3>Remember</h3>
+        <p id="wellnessMotivation"></p>
+      </div>
+      <button class="speak-btn" onclick="speakWellness()">🔊 Read aloud</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  Built with <span>Google Gemini AI</span> — PromptWars 2026
+</footer>
+
+<script>
+  const API = '';
+  let selectedMood = '';
+  let isListening = false;
+  let recognition = null;
+
+  document.querySelectorAll('.nav-tab').forEach(tab => {
+    tab.addEventListener('click', function() {
+      const target = this.dataset.tab;
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.nav-tab').forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected', 'false'); });
+      document.getElementById('tab-' + target).classList.add('active');
+      this.classList.add('active');
+      this.setAttribute('aria-selected', 'true');
+    });
+  });
+
+  function speakText(text) {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.rate = 0.85;
+      utter.pitch = 1;
+      window.speechSynthesis.speak(utter);
+    }
+  }
+
+  function toggleVoice() {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      alert('Voice input is not supported in this browser. Please use Chrome.');
+      return;
+    }
+
+    const voiceBtn = document.getElementById('voiceBtn');
+
+    if (isListening) {
+      recognition.stop();
+      isListening = false;
+      voiceBtn.classList.remove('listening');
+      voiceBtn.textContent = '🎤';
+      return;
+    }
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new SpeechRecognition();
+    recognition.lang = 'en-IN';
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    recognition.onstart = () => {
+      isListening = true;
+      voiceBtn.classList.add('listening');
+      voiceBtn.textContent = '⏹️';
+    };
+
+    recognition.onresult = (e) => {
+      const text = e.results[0][0].transcript;
+      document.getElementById('chatInput').value = text;
+      sendChat();
+    };
+
+    recognition.onend = () => {
+      isListening = false;
+      voiceBtn.classList.remove('listening');
+      voiceBtn.textContent = '🎤';
+    };
+
+    recognition.onerror = () => {
+      isListening = false;
+      voiceBtn.classList.remove('listening');
+      voiceBtn.textContent = '🎤';
+    };
+
+    recognition.start();
+  }
+
+  async function sendChat() {
+    const input = document.getElementById('chatInput');
+    const msg = input.value.trim();
+    if (!msg) return;
+
+    const messagesDiv = document.getElementById('chatMessages');
+
+    messagesDiv.innerHTML += `<div class="chat-msg user"><div class="speaker">you</div>${escapeHtml(msg)}</div>`;
+    input.value = '';
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+    messagesDiv.innerHTML += `<div class="chat-msg bot" id="typingIndicator"><div class="speaker">sahayak</div><div style="display:flex;align-items:center;gap:8px;"><div class="spinner"></div> Thinking</div></div>`;
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+    try {
+      const res = await fetch(API + '/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: msg })
+      });
+      const data = await res.json();
+
+      document.getElementById('typingIndicator').remove();
+
+      if (data.error) throw new Error(data.error);
+
+      const reply = data.reply;
+      messagesDiv.innerHTML += `<div class="chat-msg bot"><div class="speaker">sahayak</div>${escapeHtml(reply)}<br><button class="speak-btn" onclick="speakText(this.parentElement.childNodes[2].textContent)">🔊 Listen</button></div>`;
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+      speakText(reply);
+    } catch (err) {
+      document.getElementById('typingIndicator')?.remove();
+      messagesDiv.innerHTML += `<div class="chat-msg bot"><div class="speaker">sahayak</div>Sorry, I'm having trouble right now. Please try again.</div>`;
+    }
+  }
+
+  async function checkScam() {
+    const msg = document.getElementById('scamInput').value.trim();
+    if (!msg) { alert('Please paste a message to check.'); return; }
+
+    const btn = document.getElementById('scamBtn');
+    const loading = document.getElementById('scamLoading');
+    const result = document.getElementById('scamResult');
+
+    btn.disabled = true;
+    loading.classList.add('show');
+    result.classList.remove('show', 'safe', 'scam', 'suspicious');
+
+    try {
+      const res = await fetch(API + '/api/scam-check', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: msg })
+      });
+      const data = await res.json();
+
+      if (data.error) throw new Error(data.error);
+
+      const verdict = data.verdict.toUpperCase();
+      const verdictEl = document.getElementById('scamVerdict');
+      const resultClass = verdict === 'SAFE' ? 'safe' : verdict === 'SCAM' ? 'scam' : 'suspicious';
+
+      verdictEl.textContent = verdict === 'SAFE' ? '✅ Safe message' : verdict === 'SCAM' ? '🚨 Scam detected' : '⚠️ Suspicious';
+      verdictEl.className = 'verdict-badge ' + resultClass;
+
+      document.getElementById('scamExplanation').textContent = data.explanation;
+      document.getElementById('scamAdvice').textContent = data.advice;
+
+      result.className = 'result-box show ' + resultClass;
+
+      speakText(data.explanation + '. ' + data.advice);
+    } catch (err) {
+      alert('Could not check this message. Please try again.');
+    }
+
+    btn.disabled = false;
+    loading.classList.remove('show');
+  }
+
+  async function getMedicineInfo() {
+    const med = document.getElementById('medicineInput').value.trim();
+    if (!med) { alert('Please enter a medicine name.'); return; }
+
+    const btn = document.getElementById('medBtn');
+    const loading = document.getElementById('medLoading');
+    const result = document.getElementById('medResult');
+
+    btn.disabled = true;
+    loading.classList.add('show');
+    result.classList.remove('show');
+
+    try {
+      const res = await fetch(API + '/api/medicine-info', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ medicine: med })
+      });
+      const data = await res.json();
+
+      if (data.error) throw new Error(data.error);
+
+      document.getElementById('medPurpose').textContent = data.purpose;
+      document.getElementById('medHow').textContent = data.howToTake;
+      document.getElementById('medSide').textContent = data.sideEffects;
+      document.getElementById('medWarnings').textContent = data.warnings;
+      document.getElementById('medDisclaimer').textContent = data.disclaimer;
+
+      result.classList.add('show');
+    } catch (err) {
+      alert('Could not get medicine information. Please try again.');
+    }
+
+    btn.disabled = false;
+    loading.classList.remove('show');
+  }
+
+  function speakMedicine() {
+    const text = 'Purpose: ' + document.getElementById('medPurpose').textContent +
+      '. How to take: ' + document.getElementById('medHow').textContent +
+      '. Side effects: ' + document.getElementById('medSide').textContent +
+      '. Warning: ' + document.getElementById('medWarnings').textContent;
+    speakText(text);
+  }
+
+  function selectMood(btn, mood) {
+    document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    selectedMood = mood;
+    document.getElementById('wellnessBtn').disabled = false;
+  }
+
+  async function getWellnessTip() {
+    if (!selectedMood) { alert('Please select how you are feeling.'); return; }
+
+    const btn = document.getElementById('wellnessBtn');
+    const loading = document.getElementById('wellnessLoading');
+    const result = document.getElementById('wellnessResult');
+
+    btn.disabled = true;
+    loading.classList.add('show');
+    result.classList.remove('show');
+
+    try {
+      const res = await fetch(API + '/api/daily-tip', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mood: selectedMood })
+      });
+      const data = await res.json();
+
+      if (data.error) throw new Error(data.error);
+
+      document.getElementById('wellnessGreeting').textContent = data.greeting;
+      document.getElementById('wellnessTip').textContent = data.tip;
+      document.getElementById('wellnessActivity').textContent = data.activity;
+      document.getElementById('wellnessMotivation').textContent = data.motivation;
+
+      result.classList.add('show');
+
+      speakText(data.greeting + '. ' + data.tip + '. ' + data.activity);
+    } catch (err) {
+      alert('Could not get wellness tip. Please try again.');
+    }
+
+    btn.disabled = false;
+    loading.classList.remove('show');
+  }
+
+  function speakWellness() {
+    const text = document.getElementById('wellnessGreeting').textContent + '. ' +
+      document.getElementById('wellnessTip').textContent + '. ' +
+      document.getElementById('wellnessActivity').textContent + '. ' +
+      document.getElementById('wellnessMotivation').textContent;
+    speakText(text);
+  }
+
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+</script>
+
+</body>
+</html>
